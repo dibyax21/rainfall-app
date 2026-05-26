@@ -20,7 +20,13 @@ API: `POST /api/predict` · UI: `/`
 
 ## Deploy on Streamlit Cloud
 
-Connect this repo at [share.streamlit.io](https://share.streamlit.io) and set main file to **`streamlit_app.py`** (not `app.py`).
+1. Open [https://share.streamlit.io](https://share.streamlit.io) and click **New app**.
+2. Select repository: **`dibyax21/rainfall-app`**
+3. Branch: **`main`**
+4. Main file path: **`streamlit_app.py`** (not `app.py`)
+5. Click **Deploy**.
+
+Community Cloud will auto-redeploy when you push new commits to `main`.
 
 ## Retrain model
 
