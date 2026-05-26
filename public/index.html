@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rainfall Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .hero {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb 55%, #1e3a8a);
+      border-radius: 20px;
+      padding: 2rem;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 12px 40px rgba(37, 99, 235, 0.25);
+    }
+    .hero h1 { font-size: 2rem; margin-bottom: 0.35rem; }
+    .hero p { opacity: 0.92; font-size: 1.05rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.25rem;
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 1rem; color: #334155; }
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      color: #475569;
+    }
+    select, input[type="date"], input[type="range"] {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font: inherit;
+    }
+    .hint { font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem; }
+    .normal-val { font-weight: 600; color: #2563eb; }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      font: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+      background: #2563eb;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+    @media (max-width: 600px) { .metrics { grid-template-columns: 1fr; } }
+    .metric {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .metric .val { font-size: 1.5rem; font-weight: 700; }
+    .metric .lbl { font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
+    .result-box {
+      border-radius: 18px;
+      padding: 1.75rem;
+      text-align: center;
+      color: #fff;
+      display: none;
+    }
+    .result-box.show { display: block; }
+    .result-emoji { font-size: 2.5rem; }
+    .result-value { font-size: 2.75rem; font-weight: 700; }
+    .result-label { font-size: 1.1rem; opacity: 0.9; margin-top: 0.35rem; }
+    .info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .error.show { display: block; }
+    #results { display: none; }
+    #results.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>🌧️ Rainfall Predictor</h1>
+      <p>Simple, clear forecasts for any state and date in India.</p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>📍 Location & date</h2>
+        <label for="state">State / region</label>
+        <select id="state"></select>
+        <label for="date">Date</label>
+        <input type="date" id="date" value="2026-05-22" min="2000-01-01" max="2100-12-31" />
+        <p class="hint" id="dateCaption"></p>
+      </section>
+
+      <section class="card">
+        <h2>💧 Climate input</h2>
+        <p class="hint" id="monthHint"></p>
+        <label for="normal">Normal rainfall (mm): <span class="normal-val" id="normalVal">18</span></label>
+        <input type="range" id="normal" min="0" max="150" step="0.5" value="18" />
+      </section>
+    </div>
+
+    <button type="button" id="predictBtn">Get rainfall prediction</button>
+    <p class="info" id="placeholder">👆 Fill in the form above, then click the button to see your forecast.</p>
+    <p class="error" id="errorBox"></p>
+
+    <div id="results">
+      <h2 style="margin: 1.25rem 0 0.75rem; font-size: 1.1rem;">Your forecast</h2>
+      <div class="metrics">
+        <div class="metric"><div class="val" id="mPred">—</div><div class="lbl">Predicted rainfall</div></div>
+        <div class="metric"><div class="val" id="mNorm">—</div><div class="lbl">Normal (baseline)</div></div>
+        <div class="metric"><div class="val" id="mDelta">—</div><div class="lbl">Vs normal</div></div>
+      </div>
+      <div class="result-box" id="resultBox">
+        <div class="result-emoji" id="rEmoji"></div>
+        <div class="result-value" id="rValue"></div>
+        <div class="result-label" id="rLabel"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MONTHS = ["", "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"];
+    let monthlyHints = {};
+    let stateList = [];
+
+    const stateEl = document.getElementById("state");
+    const dateEl = document.getElementById("date");
+    const normalEl = document.getElementById("normal");
+    const normalVal = document.getElementById("normalVal");
+    const monthHint = document.getElementById("monthHint");
+    const dateCaption = document.getElementById("dateCaption");
+    const predictBtn = document.getElementById("predictBtn");
+    const placeholder = document.getElementById("placeholder");
+    const errorBox = document.getElementById("errorBox");
+    const results = document.getElementById("results");
+
+    function updateDateUI() {
+      const d = new Date(dateEl.value + "T12:00:00");
+      const m = d.getMonth() + 1;
+      const hint = monthlyHints[m] ?? 10;
+      monthHint.textContent = `Suggested normal for ${MONTHS[m]}: ~${hint} mm`;
+      normalEl.value = hint;
+      normalVal.textContent = hint;
+      const name = stateList.find(s => s.code == stateEl.value)?.name || "";
+      dateCaption.textContent = `Selected: ${MONTHS[m]} ${d.getDate()}, ${d.getFullYear()} · ${name}`;
+    }
+
+    normalEl.addEventListener("input", () => {
+      normalVal.textContent = normalEl.value;
+    });
+    dateEl.addEventListener("change", updateDateUI);
+    stateEl.addEventListener("change", updateDateUI);
+
+    async function init() {
+      const res = await fetch("/api/states");
+      const data = await res.json();
+      monthlyHints = data.monthly_hints;
+      stateList = data.states;
+      stateEl.innerHTML = stateList.map(s =>
+        `<option value="${s.code}"${s.name === "Maharashtra" ? " selected" : ""}>${s.name}</option>`
+      ).join("");
+      updateDateUI();
+    }
+
+    predictBtn.addEventListener("click", async () => {
+      errorBox.classList.remove("show");
+      predictBtn.disabled = true;
+      predictBtn.textContent = "Predicting…";
+      const d = new Date(dateEl.value + "T12:00:00");
+      try {
+        const res = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            state_code: Number(stateEl.value),
+            year: d.getFullYear(),
+            month: d.getMonth() + 1,
+            day: d.getDate(),
+            normal: Number(normalEl.value),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Prediction failed");
+
+        placeholder.style.display = "none";
+        results.classList.add("show");
+        document.getElementById("mPred").textContent = data.prediction.toFixed(1) + " mm";
+        document.getElementById("mNorm").textContent = data.normal.toFixed(1) + " mm";
+        const sign = data.delta >= 0 ? "+" : "";
+        document.getElementById("mDelta").textContent = sign + data.delta.toFixed(1) + " mm";
+
+        const box = document.getElementById("resultBox");
+        box.style.background = `linear-gradient(135deg, ${data.category.color}, #1e3a8a)`;
+        box.classList.add("show");
+        document.getElementById("rEmoji").textContent = data.category.emoji;
+        document.getElementById("rValue").textContent = data.prediction.toFixed(1) + " mm";
+        document.getElementById("rLabel").textContent = data.category.label;
+      } catch (e) {
+        errorBox.textContent = e.message;
+        errorBox.classList.add("show");
+      } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = "Get rainfall prediction";
+      }
+    });
+
+    init().catch(() => {
+      errorBox.textContent = "Could not load states. Check that the API is running.";
+      errorBox.classList.add("show");
+    });
+  </script>
+</body>
+</html>
