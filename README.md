@@ -20,10 +20,14 @@ API: `POST /api/predict` · UI: `/`
 
 ## Deploy on Streamlit Cloud
 
+This repo has two deploy targets:
+- **Vercel**: `app.py` (FastAPI)
+- **Streamlit Cloud**: `streamlit_cloud/streamlit_app.py` (Streamlit)
+
 1. Open [https://share.streamlit.io](https://share.streamlit.io) and click **New app**.
 2. Select repository: **`dibyax21/rainfall-app`**
 3. Branch: **`main`**
-4. Main file path: **`streamlit_app.py`** (not `app.py`)
+4. Main file path: **`streamlit_cloud/streamlit_app.py`**
 5. Click **Deploy**.
 
 Community Cloud will auto-redeploy when you push new commits to `main`.
