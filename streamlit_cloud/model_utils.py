@@ -3,7 +3,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-MODEL_PATH = Path(__file__).resolve().parent / "rf_model.pkl"
+MODEL_PATH = Path(__file__).resolve().parent.parent / "rf_model.pkl"
 
 STATES = {
     1: "Andhra Pradesh",
